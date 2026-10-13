@@ -209,7 +209,7 @@
                     <!-- Nominal Anggaran -->
                     <div class="mb-3">
                         <label for="amount" class="form-label">Batas Anggaran Bulanan (Rp)</label>
-                        <input type="number" name="amount" class="form-control" placeholder="cth: 2000000" min="0.01" step="any" required>
+                        <input type="number" inputmode="numeric" name="amount" class="form-control" placeholder="cth: 2000000" min="0.01" step="any" required>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 pb-4 px-4">
@@ -268,7 +268,7 @@
                     <!-- Nominal Anggaran -->
                     <div class="mb-3">
                         <label for="edit_amount" class="form-label">Batas Anggaran Bulanan (Rp)</label>
-                        <input type="number" name="amount" id="edit_amount" class="form-control" min="0.01" step="any" required>
+                        <input type="number" inputmode="numeric" name="amount" id="edit_amount" class="form-control" min="0.01" step="any" required>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 pb-4 px-4">

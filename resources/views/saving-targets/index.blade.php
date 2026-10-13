@@ -140,11 +140,11 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="target_amount" class="form-label">Target Nominal (Rp)</label>
-                            <input type="number" name="target_amount" class="form-control" placeholder="cth: 10000000" min="0.01" required>
+                            <input type="number" inputmode="numeric" name="target_amount" class="form-control" placeholder="cth: 10000000" min="0.01" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="current_amount" class="form-label">Nominal Terkumpul (Rp)</label>
-                            <input type="number" name="current_amount" class="form-control" placeholder="cth: 1000000" min="0" value="0" required>
+                            <input type="number" inputmode="numeric" name="current_amount" class="form-control" placeholder="cth: 1000000" min="0" value="0" required>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -181,11 +181,11 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="edit_target" class="form-label">Target Nominal (Rp)</label>
-                            <input type="number" name="target_amount" id="edit_target" class="form-control" min="0.01" required>
+                            <input type="number" inputmode="numeric" name="target_amount" id="edit_target" class="form-control" min="0.01" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="edit_current" class="form-label">Nominal Terkumpul (Rp)</label>
-                            <input type="number" name="current_amount" id="edit_current" class="form-control" min="0" required>
+                            <input type="number" inputmode="numeric" name="current_amount" id="edit_current" class="form-control" min="0" required>
                         </div>
                     </div>
                     <div class="mb-3">

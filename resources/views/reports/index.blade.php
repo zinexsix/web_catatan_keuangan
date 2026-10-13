@@ -43,44 +43,50 @@
 </div>
 
 <!-- Export Action Buttons -->
-<div class="d-flex justify-content-end gap-2 mb-4">
+<div class="row g-2 mb-4 justify-content-md-end">
     <!-- PDF Export -->
-    <a href="{{ route('reports.pdf', request()->query()) }}" class="btn btn-outline-danger px-3 py-2 rounded-pill small">
-        <i class="fas fa-file-pdf me-1"></i> Cetak PDF
-    </a>
+    <div class="col-4 col-md-auto">
+        <a href="{{ route('reports.pdf', request()->query()) }}" class="btn btn-outline-danger px-3 py-2 rounded-pill small w-100 text-nowrap">
+            <i class="fas fa-file-pdf me-1"></i> PDF
+        </a>
+    </div>
     <!-- Excel Export -->
-    <a href="{{ route('reports.excel', request()->query()) }}" class="btn btn-outline-success px-3 py-2 rounded-pill small">
-        <i class="fas fa-file-excel me-1"></i> Ekspor Excel
-    </a>
+    <div class="col-4 col-md-auto">
+        <a href="{{ route('reports.excel', request()->query()) }}" class="btn btn-outline-success px-3 py-2 rounded-pill small w-100 text-nowrap">
+            <i class="fas fa-file-excel me-1"></i> Excel
+        </a>
+    </div>
     <!-- Print Window -->
-    <a href="{{ route('reports.print', request()->query()) }}" target="_blank" class="btn btn-outline-primary px-3 py-2 rounded-pill small">
-        <i class="fas fa-print me-1"></i> Print Laporan
-    </a>
+    <div class="col-4 col-md-auto">
+        <a href="{{ route('reports.print', request()->query()) }}" target="_blank" class="btn btn-outline-primary px-3 py-2 rounded-pill small w-100 text-nowrap">
+            <i class="fas fa-print me-1"></i> Cetak
+        </a>
+    </div>
 </div>
 
 <!-- Aggregated Summary Cards -->
-<div class="row g-4 mb-4">
-    <div class="col-md-4">
-        <div class="card sum-card income">
-            <div class="card-body p-4 text-center">
-                <span class="text-white-50 small text-uppercase fw-semibold d-block mb-1">Total Pemasukan</span>
-                <h3 class="fw-bold mb-0">Rp {{ number_format($totalIncome, 0, ',', '.') }}</h3>
+<div class="row g-3 g-md-4 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="card sum-card">
+            <div class="card-body p-4 text-md-center d-flex d-md-block justify-content-between align-items-center">
+                <span class="text-secondary small text-uppercase fw-semibold d-block mb-md-1">Total Pemasukan</span>
+                <h4 class="fw-bold mb-0 text-success">Rp {{ number_format($totalIncome, 0, ',', '.') }}</h4>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card sum-card expense">
-            <div class="card-body p-4 text-center">
-                <span class="text-white-50 small text-uppercase fw-semibold d-block mb-1">Total Pengeluaran</span>
-                <h3 class="fw-bold mb-0">Rp {{ number_format($totalExpense, 0, ',', '.') }}</h3>
+    <div class="col-12 col-md-4">
+        <div class="card sum-card">
+            <div class="card-body p-4 text-md-center d-flex d-md-block justify-content-between align-items-center">
+                <span class="text-secondary small text-uppercase fw-semibold d-block mb-md-1">Total Pengeluaran</span>
+                <h4 class="fw-bold mb-0 text-danger">Rp {{ number_format($totalExpense, 0, ',', '.') }}</h4>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card sum-card net">
-            <div class="card-body p-4 text-center">
-                <span class="text-white-50 small text-uppercase fw-semibold d-block mb-1">Pendapatan Bersih</span>
-                <h3 class="fw-bold mb-0">Rp {{ number_format($netIncome, 0, ',', '.') }}</h3>
+    <div class="col-12 col-md-4">
+        <div class="card sum-card">
+            <div class="card-body p-4 text-md-center d-flex d-md-block justify-content-between align-items-center">
+                <span class="text-secondary small text-uppercase fw-semibold d-block mb-md-1">Pendapatan Bersih</span>
+                <h4 class="fw-bold mb-0 text-primary">Rp {{ number_format($netIncome, 0, ',', '.') }}</h4>
             </div>
         </div>
     </div>
@@ -115,7 +121,28 @@
                 <h5 class="fw-bold mb-0"><i class="fas fa-list me-2 text-primary"></i>Detail Transaksi Periode</h5>
             </div>
             <div class="card-body p-4 pt-0">
-                <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                <!-- Mobile list -->
+                <div class="d-md-none" style="max-height: 420px; overflow-y: auto;">
+                    @forelse($transactions as $tx)
+                        <div class="mobile-list-item">
+                            <div class="mobile-list-body">
+                                <div class="d-flex justify-content-between gap-2">
+                                    <strong class="text-truncate">{{ $tx->title }}</strong>
+                                    <span class="fw-bold text-nowrap text-{{ $tx->type === 'income' ? 'success' : 'danger' }}">
+                                        {{ $tx->type === 'income' ? '+' : '-' }}Rp {{ number_format($tx->amount, 0, ',', '.') }}
+                                    </span>
+                                </div>
+                                <div class="small text-secondary text-truncate">
+                                    {{ $tx->category->name ?? 'Lainnya' }} · {{ $tx->date->format('d-m-Y') }} · {{ $tx->payment_method_label }}
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-center py-4 text-muted small mb-0">Tidak ada data transaksi pada periode ini</p>
+                    @endforelse
+                </div>
+
+                <div class="table-responsive d-none d-md-block" style="max-height: 350px; overflow-y: auto;">
                     <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>

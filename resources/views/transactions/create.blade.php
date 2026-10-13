@@ -55,7 +55,7 @@
                         <!-- Nominal -->
                         <div class="col-md-6 mb-3">
                             <label for="amount" class="form-label fw-semibold">Nominal Rupiah (Rp) <span class="text-danger">*</span></label>
-                            <input type="number" name="amount" id="amount" class="form-control" placeholder="cth: 50000" min="0.01" step="any" value="{{ old('amount') }}" required>
+                            <input type="number" inputmode="numeric" name="amount" id="amount" class="form-control" placeholder="cth: 50000" min="0.01" step="any" value="{{ old('amount') }}" required>
                         </div>
                     </div>
 
@@ -75,7 +75,7 @@
                         <!-- Bukti Foto (Optional) -->
                         <div class="col-md-6 mb-3">
                             <label for="receipt_image" class="form-label fw-semibold">Bukti Foto <span class="text-secondary small">(Opsional, Maks 2MB)</span></label>
-                            <input type="file" name="receipt_image" id="receipt_image" class="form-control" accept="image/*">
+                            <input type="file" name="receipt_image" id="receipt_image" class="form-control" accept="image/*" data-compress-image>
                         </div>
                     </div>
 

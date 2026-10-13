@@ -23,12 +23,12 @@
             <table class="table table-hover align-middle" id="categoriesTable">
                 <thead>
                     <tr>
-                        <th width="80">Icon</th>
+                        <th width="56">Icon</th>
                         <th>Nama Kategori</th>
-                        <th>Jenis</th>
-                        <th>Warna</th>
-                        <th>Jumlah Transaksi</th>
-                        <th class="text-end" width="150">Aksi</th>
+                        <th class="d-none d-md-table-cell">Jenis</th>
+                        <th class="d-none d-md-table-cell">Warna</th>
+                        <th class="d-none d-md-table-cell">Jumlah Transaksi</th>
+                        <th class="text-end" width="110">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -39,20 +39,25 @@
                                     <i class="fas {{ $category->icon }}"></i>
                                 </div>
                             </td>
-                            <td><strong class="text-primary">{{ $category->name }}</strong></td>
                             <td>
+                                <strong class="text-primary">{{ $category->name }}</strong>
+                                <div class="d-md-none small text-secondary">
+                                    {{ $category->type === 'income' ? 'Pemasukan' : 'Pengeluaran' }} · {{ $category->transactions_count }} transaksi
+                                </div>
+                            </td>
+                            <td class="d-none d-md-table-cell">
                                 <span class="badge bg-{{ $category->type === 'income' ? 'success' : 'danger' }}-subtle text-{{ $category->type === 'income' ? 'success' : 'danger' }} px-3 py-2 rounded-pill small text-uppercase">
                                     {{ $category->type === 'income' ? 'Pemasukan' : 'Pengeluaran' }}
                                 </span>
                             </td>
-                            <td>
+                            <td class="d-none d-md-table-cell">
                                 <div class="d-flex align-items-center">
                                     <span class="d-inline-block rounded border me-2" style="width: 20px; height: 20px; background-color: {{ $category->color }};"></span>
                                     <code>{{ $category->color }}</code>
                                 </div>
                             </td>
-                            <td>{{ $category->transactions_count }} Transaksi</td>
-                            <td class="text-end">
+                            <td class="d-none d-md-table-cell">{{ $category->transactions_count }} Transaksi</td>
+                            <td class="text-end text-nowrap">
                                 <button class="btn btn-sm btn-outline-primary border-0 me-1 edit-category-btn" 
                                     data-id="{{ $category->id }}"
                                     data-name="{{ $category->name }}"
@@ -223,7 +228,7 @@ $(document).ready(function() {
     });
 
     // ── Edit Modal Handling ──
-    $('.edit-category-btn').on('click', function() {
+    $(document).on('click', '.edit-category-btn', function() {
         const id = $(this).data('id');
         const name = $(this).data('name');
         const type = $(this).data('type');
@@ -263,7 +268,7 @@ $(document).ready(function() {
     });
 
     // ── SweetAlert Delete Confirmation ──
-    $('.delete-category-form').on('submit', function(e) {
+    $(document).on('submit', '.delete-category-form', function(e) {
         e.preventDefault();
         const form = this;
         Swal.fire({

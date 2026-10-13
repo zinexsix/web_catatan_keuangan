@@ -30,7 +30,7 @@
                     </div>
                 </div>
 
-                <a href="{{ route('transactions.create') }}" class="btn btn-primary rounded-pill px-4 py-2.5 shadow-sm">
+                <a href="{{ route('transactions.create') }}" class="btn btn-primary rounded-pill px-4 py-2.5 shadow-sm d-none d-md-inline-block">
                     <i class="fas fa-plus me-2"></i> Tambah Transaksi
                 </a>
             </div>

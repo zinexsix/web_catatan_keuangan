@@ -175,7 +175,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="amount" class="form-label">Nominal (Rp)</label>
-                            <input type="number" name="amount" class="form-control" placeholder="cth: 350000" min="0.01" step="any" required>
+                            <input type="number" inputmode="numeric" name="amount" class="form-control" placeholder="cth: 350000" min="0.01" step="any" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="due_day" class="form-label">Tanggal Jatuh Tempo (1-31)</label>
@@ -237,7 +237,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="edit_amount" class="form-label">Nominal (Rp)</label>
-                            <input type="number" name="amount" id="edit_amount" class="form-control" min="0.01" step="any" required>
+                            <input type="number" inputmode="numeric" name="amount" id="edit_amount" class="form-control" min="0.01" step="any" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="edit_due_day" class="form-label">Tanggal Jatuh Tempo (1-31)</label>

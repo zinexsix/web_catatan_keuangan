@@ -6,10 +6,11 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="{{ $theme }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Finance Manager') }}</title>
+    @include('partials.pwa-head')
 
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -239,6 +240,7 @@
         #main-content {
             margin-left: var(--sidebar-width);
             flex: 1;
+            min-width: 0; /* allow shrinking below content width on small screens */
             display: flex; flex-direction: column;
             min-height: 100vh;
             transition: margin-left var(--transition);
@@ -428,6 +430,86 @@
 
         /* ===== TRANSITIONS ===== */
         .btn, .nav-link, .card, .form-control { transition: all var(--transition); }
+
+        /* ===== MOBILE LIST (card rows used instead of tables on phones) ===== */
+        .mobile-list-item {
+            display: flex; gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .mobile-list-item:first-child { padding-top: 0; }
+        .mobile-list-item:last-child { border-bottom: 0; padding-bottom: 0; }
+        .mobile-list-icon {
+            width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 0.9rem;
+        }
+        .mobile-list-body { flex: 1; min-width: 0; }
+        .mobile-list-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .mobile-list-actions .btn {
+            font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 8px;
+            background: var(--body-bg); border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        /* ===== BOTTOM NAV (phones only) ===== */
+        #bottom-nav { display: none; }
+
+        /* ===== PHONE LAYOUT ===== */
+        @media (max-width: 767.98px) {
+            #top-navbar { height: 56px; padding: 0 12px; }
+            #page-content {
+                padding: 16px 14px calc(92px + env(safe-area-inset-bottom));
+            }
+            #page-content .row.g-4 { --bs-gutter-x: 1rem; --bs-gutter-y: 1rem; }
+            #page-content .mb-4 { margin-bottom: 1rem !important; }
+            #page-content .card-body.p-4,
+            #page-content .card-body.p-5 { padding: 1rem !important; }
+            #page-content .card-header.px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+            #page-content h1 { font-size: 1.6rem !important; }
+            #page-content h3 { font-size: 1.3rem; }
+            #page-content h4 { font-size: 1.15rem; }
+            .stat-value { font-size: 1.35rem; }
+            /* 16px inputs stop iOS Safari from zooming in on focus */
+            .form-control, .form-select { font-size: 16px; }
+            .modal-dialog { margin: 0.75rem; }
+            .alert { font-size: 0.875rem; }
+            #page-content .btn.rounded-pill { white-space: nowrap; }
+            #page-content .btn.rounded-pill.px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+            .dataTables_wrapper .row { --bs-gutter-x: 0.5rem; }
+            .dataTables_wrapper .dataTables_length,
+            .dataTables_wrapper .dataTables_filter { text-align: left !important; }
+
+            #bottom-nav {
+                display: flex; align-items: flex-end;
+                position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030;
+                background: var(--card-bg);
+                border-top: 1px solid var(--border-color);
+                box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.06);
+                padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+            }
+            #bottom-nav .bn-item {
+                flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+                padding: 4px 0; border: 0; background: none;
+                font-size: 0.68rem; font-weight: 600;
+                color: var(--text-secondary); text-decoration: none;
+            }
+            #bottom-nav .bn-item i { font-size: 1.15rem; }
+            #bottom-nav .bn-item.active { color: var(--accent); }
+            #bottom-nav .bn-add {
+                width: 52px; height: 52px; margin-top: -26px;
+                border-radius: 50%; background: var(--accent); color: #fff;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 1.3rem;
+                box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+                border: 4px solid var(--card-bg);
+            }
+        }
+
+        /* ===== INSTALLED APP (standalone) ===== */
+        @media (display-mode: standalone) and (max-width: 767.98px) {
+            #top-navbar { padding-top: env(safe-area-inset-top); height: calc(56px + env(safe-area-inset-top)); }
+        }
     </style>
 
     @stack('styles')
@@ -566,6 +648,15 @@
                                 </div>
                             </a>
                         </li>
+                        <li class="nav-item d-none" id="sidebarInstallItem">
+                            <a href="#" class="nav-link">
+                                <div class="nav-icon"><i class="fas fa-mobile-screen-button" style="color:#818cf8"></i></div>
+                                <div class="nav-label">
+                                    Pasang Aplikasi
+                                    <span class="nav-sublabel">Tambahkan ke Layar Utama</span>
+                                </div>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
 
@@ -650,6 +741,27 @@
         </div>
     </div>
 
+    <!-- ===== BOTTOM NAV (phones) ===== -->
+    <nav id="bottom-nav" aria-label="Navigasi utama">
+        <a href="{{ route('dashboard') }}" class="bn-item {{ Route::is('dashboard') ? 'active' : '' }}">
+            <i class="fas fa-house"></i> Beranda
+        </a>
+        <a href="{{ route('transactions.index') }}" class="bn-item {{ Route::is('transactions.index', 'transactions.edit') ? 'active' : '' }}">
+            <i class="fas fa-list-ul"></i> Transaksi
+        </a>
+        <a href="{{ route('transactions.create') }}" class="bn-item" aria-label="Tambah transaksi">
+            <span class="bn-add"><i class="fas fa-plus"></i></span>
+        </a>
+        <a href="{{ route('reports.index') }}" class="bn-item {{ Route::is('reports.*') ? 'active' : '' }}">
+            <i class="fas fa-chart-line"></i> Laporan
+        </a>
+        <button type="button" class="bn-item" id="bottomNavMenu">
+            <i class="fas fa-bars"></i> Menu
+        </button>
+    </nav>
+
+    @include('partials.pwa-install')
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <!-- Bootstrap 5 JS -->
@@ -681,6 +793,8 @@
             sidebar.classList.contains('show') ? closeSidebar() : openSidebar();
         });
         if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+        const bottomMenuBtn = document.getElementById('bottomNavMenu');
+        if (bottomMenuBtn) bottomMenuBtn.addEventListener('click', openSidebar);
         if (overlay) overlay.addEventListener('click', closeSidebar);
 
         if (themeToggle) {
@@ -701,8 +815,60 @@
             });
         }
     })();
+
+    // ── Receipt photos: shrink large phone camera images before upload (server limit is 2MB) and show a preview ──
+    (function () {
+        const MAX_SIDE = 1600;
+        const QUALITY = 0.8;
+
+        function showPreview(file) {
+            const container = document.getElementById('receipt-preview-container');
+            const img = document.getElementById('receipt-preview');
+            if (!container || !img) return;
+            img.src = URL.createObjectURL(file);
+            container.classList.remove('d-none');
+        }
+
+        function compress(file) {
+            return new Promise(function (resolve) {
+                const img = new Image();
+                img.onload = function () {
+                    const scale = Math.min(1, MAX_SIDE / Math.max(img.width, img.height));
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(img.width * scale);
+                    canvas.height = Math.round(img.height * scale);
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob(function (blob) {
+                        URL.revokeObjectURL(img.src);
+                        if (!blob || blob.size >= file.size) return resolve(file);
+                        const name = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+                        resolve(new File([blob], name, { type: 'image/jpeg', lastModified: Date.now() }));
+                    }, 'image/jpeg', QUALITY);
+                };
+                img.onerror = function () { resolve(file); };
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        document.querySelectorAll('input[type="file"][data-compress-image]').forEach(function (input) {
+            input.addEventListener('change', function () {
+                const file = input.files && input.files[0];
+                if (!file || !file.type.startsWith('image/')) return;
+                if (file.size <= 1024 * 1024 || typeof DataTransfer === 'undefined') {
+                    showPreview(file);
+                    return;
+                }
+                compress(file).then(function (result) {
+                    const dt = new DataTransfer();
+                    dt.items.add(result);
+                    input.files = dt.files;
+                    showPreview(result);
+                });
+            });
+        });
+    })();
     </script>
-    
+
     @stack('scripts')
     @yield('scripts')
 </body>
