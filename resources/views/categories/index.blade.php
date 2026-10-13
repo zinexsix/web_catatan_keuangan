@@ -2,6 +2,25 @@
 
 @section('styles')
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
+    <style>
+        .icon-picker { max-height: 240px; overflow-y: auto; background: var(--body-bg); }
+        .icon-picker-group {
+            position: sticky; top: -8px; z-index: 1;
+            margin: 0 -8px 6px; padding: 6px 10px 4px;
+            background: var(--body-bg);
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+        .icon-picker-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+            gap: 6px; margin-bottom: 10px;
+        }
+        .icon-picker .icon-select-btn {
+            height: 42px; padding: 0; display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; border-color: var(--border-color); color: var(--text-primary);
+        }
+        .icon-picker .icon-select-btn.active { color: #fff; }
+    </style>
 @endsection
 
 @section('content')
@@ -86,17 +105,6 @@
     </div>
 </div>
 
-<!-- Icons Helper Data -->
-@php
-    $icons = [
-        'fa-utensils', 'fa-car', 'fa-shopping-bag', 'fa-bolt', 'fa-wifi', 
-        'fa-tint', 'fa-mobile-alt', 'fa-graduation-cap', 'fa-heartbeat', 
-        'fa-film', 'fa-money-bill-wave', 'fa-gift', 'fa-chart-line', 
-        'fa-laptop-code', 'fa-plus-circle', 'fa-ellipsis-h', 'fa-house',
-        'fa-shirt', 'fa-plane', 'fa-gamepad', 'fa-briefcase', 'fa-coins'
-    ];
-@endphp
-
 <!-- Create Modal -->
 <div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -128,16 +136,10 @@
                         <input type="color" name="color" class="form-control form-control-color w-100" value="#6366f1" style="height: 45px;">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Pilih Icon (FontAwesome)</label>
+                        <label class="form-label">Pilih Icon</label>
                         <input type="hidden" name="icon" id="create_icon_input" value="fa-tag">
-                        <div class="d-flex flex-wrap gap-2 border p-3 rounded bg-light" style="max-height: 150px; overflow-y: auto;">
-                            @foreach($icons as $icon)
-                                <button type="button" class="btn btn-outline-secondary icon-select-btn px-3 py-2" data-icon="{{ $icon }}">
-                                    <i class="fas {{ $icon }}"></i>
-                                </button>
-                            @endforeach
-                        </div>
-                        <div class="mt-2 small text-muted">Selected Icon: <i class="fas fa-tag id="create_icon_preview"></i> <span id="create_icon_name">fa-tag</span></div>
+                        @include('categories.partials.icon-picker')
+                        <div class="mt-2 small text-muted">Icon terpilih: <i class="fas fa-tag" id="create_icon_preview"></i> <span id="create_icon_name">fa-tag</span></div>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 pb-4 px-4">
@@ -181,16 +183,10 @@
                         <input type="color" name="color" id="edit_color" class="form-control form-control-color w-100" style="height: 45px;">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Pilih Icon (FontAwesome)</label>
+                        <label class="form-label">Pilih Icon</label>
                         <input type="hidden" name="icon" id="edit_icon_input" value="">
-                        <div class="d-flex flex-wrap gap-2 border p-3 rounded bg-light" style="max-height: 150px; overflow-y: auto;">
-                            @foreach($icons as $icon)
-                                <button type="button" class="btn btn-outline-secondary icon-select-btn px-3 py-2" data-icon="{{ $icon }}">
-                                    <i class="fas {{ $icon }}"></i>
-                                </button>
-                            @endforeach
-                        </div>
-                        <div class="mt-2 small text-muted">Selected Icon: <i class="fas fa-tag" id="edit_icon_preview"></i> <span id="edit_icon_name"></span></div>
+                        @include('categories.partials.icon-picker')
+                        <div class="mt-2 small text-muted">Icon terpilih: <i class="fas fa-tag" id="edit_icon_preview"></i> <span id="edit_icon_name"></span></div>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 pb-4 px-4">
@@ -255,6 +251,10 @@ $(document).ready(function() {
         // Highlight selected icon in edit modal list
         $('#editCategoryModal .icon-select-btn').removeClass('active btn-primary').addClass('btn-outline-secondary');
         $(`#editCategoryModal .icon-select-btn[data-icon="${icon}"]`).addClass('active btn-primary').removeClass('btn-outline-secondary');
+        $('#editCategoryModal').one('shown.bs.modal', function () {
+            const selected = $('#editCategoryModal .icon-select-btn.active')[0];
+            if (selected) selected.scrollIntoView({ block: 'center' });
+        });
     });
 
     // Edit Modal Icon Selection
