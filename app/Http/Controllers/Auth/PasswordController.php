@@ -15,8 +15,9 @@ class PasswordController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
+        // Accounts created via Google have no password yet, so they may set one directly.
         $validated = $request->validateWithBag('updatePassword', [
-            'current_password' => ['required', 'current_password'],
+            'current_password' => $request->user()->password ? ['required', 'current_password'] : ['nullable'],
             'password' => ['required', Password::defaults(), 'confirmed'],
         ]);
 

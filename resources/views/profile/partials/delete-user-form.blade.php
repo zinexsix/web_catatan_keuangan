@@ -24,6 +24,7 @@
                             Apakah Anda yakin ingin menghapus akun Anda secara permanen? Sekali dihapus, seluruh data riwayat keuangan Anda tidak dapat dikembalikan. Silakan masukkan kata sandi Anda untuk mengonfirmasi tindakan ini.
                         </p>
                         
+                        @if (auth()->user()->password)
                         <!-- Password input -->
                         <div class="mb-3">
                             <label for="password" class="form-label fw-semibold text-secondary small">Kata Sandi Anda</label>
@@ -35,6 +36,7 @@
                                 @enderror
                             </div>
                         </div>
+                        @endif
                     </div>
                     
                     <div class="modal-footer border-top-0 pb-4 px-4">

@@ -17,7 +17,7 @@ $defaults = [
     'APP_SERVICES_CACHE' => '/tmp/bootstrap/services.php',
     'LOG_CHANNEL' => 'stderr',
     'QUEUE_CONNECTION' => 'sync',
-    'RECEIPT_DISK' => 's3',
+    'RECEIPT_DISK' => 'database',
     'MYSQL_ATTR_SSL_CA' => '/etc/pki/tls/certs/ca-bundle.crt',
 ];
 

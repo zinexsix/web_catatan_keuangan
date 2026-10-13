@@ -32,7 +32,6 @@ Route::middleware(['auth'])->group(function () {
     // Profile Settings
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // CRUD Categories
@@ -40,6 +39,9 @@ Route::middleware(['auth'])->group(function () {
 
     // CRUD Transactions
     Route::resource('transactions', TransactionController::class)->except(['show']);
+    Route::get('/receipts/{filename}', [TransactionController::class, 'receipt'])
+        ->where('filename', '[A-Za-z0-9._-]+')
+        ->name('receipts.show');
 
     // CRUD Saving Targets
     Route::resource('saving-targets', SavingTargetController::class)->except(['create', 'show', 'edit']);

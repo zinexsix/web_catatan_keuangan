@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
@@ -146,11 +147,37 @@ class Transaction extends Model
     }
 
     /**
+     * Store an uploaded receipt and return its relative path.
+     */
+    public static function storeReceipt(UploadedFile $file): string
+    {
+        if (static::receiptDisk() !== 'database') {
+            return $file->store('receipts', static::receiptDisk());
+        }
+
+        $path = 'receipts/'.$file->hashName();
+
+        ReceiptFile::create([
+            'path' => $path,
+            'mime_type' => $file->getMimeType(),
+            'content' => base64_encode($file->get()),
+        ]);
+
+        return $path;
+    }
+
+    /**
      * Delete a stored receipt file from the receipt disk.
      */
     public static function deleteReceipt(?string $value): void
     {
-        if ($path = static::receiptPath($value)) {
+        if (! $path = static::receiptPath($value)) {
+            return;
+        }
+
+        if (static::receiptDisk() === 'database') {
+            ReceiptFile::where('path', $path)->delete();
+        } else {
             Storage::disk(static::receiptDisk())->delete($path);
         }
     }
@@ -164,7 +191,13 @@ class Transaction extends Model
     {
         $path = static::receiptPath($value);
 
-        return $path ? Storage::disk(static::receiptDisk())->url($path) : null;
+        if (! $path) {
+            return null;
+        }
+
+        return static::receiptDisk() === 'database'
+            ? route('receipts.show', basename($path))
+            : Storage::disk(static::receiptDisk())->url($path);
     }
 
     /**

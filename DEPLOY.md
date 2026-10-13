@@ -44,7 +44,7 @@ Setelah mengubah `.env`, jalankan ulang `php artisan config:cache`.
 Sudah disiapkan: [vercel.json](vercel.json) (runtime `vercel-php@0.7.4` / PHP 8.3) dan [api/index.php](api/index.php) yang mengarahkan `storage/` dan cache ke `/tmp`.
 
 - Database: MySQL eksternal gratis, misalnya **TiDB Cloud Starter** (port 4000, wajib SSL).
-- Foto struk: **Supabase Storage** (S3 compatible) dengan `RECEIPT_DISK=s3`.
+- Foto struk: otomatis disimpan di database (`RECEIPT_DISK=database`, default di Vercel). Opsional: **Supabase Storage** (S3 compatible) dengan `RECEIPT_DISK=s3`.
 - Daftar environment variable ada di [.env.vercel.example](.env.vercel.example).
 - Migrasi dijalankan dari laptop: salin `.env.vercel.example` menjadi `.env.vercel`, isi, lalu `php artisan migrate --force --env=vercel`.
 

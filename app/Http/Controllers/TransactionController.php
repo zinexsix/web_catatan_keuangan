@@ -6,10 +6,12 @@ use App\Http\Requests\TransactionRequest;
 use App\Models\Budget;
 use App\Models\Category;
 use App\Models\Notification;
+use App\Models\ReceiptFile;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -110,7 +112,7 @@ class TransactionController extends Controller
 
         // Handle File Upload
         if ($request->hasFile('receipt_image')) {
-            $data['receipt_image'] = $request->file('receipt_image')->store('receipts', Transaction::receiptDisk());
+            $data['receipt_image'] = Transaction::storeReceipt($request->file('receipt_image'));
         }
 
         $transaction = $user->transactions()->create($data);
@@ -154,7 +156,7 @@ class TransactionController extends Controller
             // Delete old file if exists
             Transaction::deleteReceipt($transaction->getRawOriginal('receipt_image'));
 
-            $data['receipt_image'] = $request->file('receipt_image')->store('receipts', Transaction::receiptDisk());
+            $data['receipt_image'] = Transaction::storeReceipt($request->file('receipt_image'));
         }
 
         $transaction->update($data);
@@ -183,6 +185,26 @@ class TransactionController extends Controller
 
         return redirect()->route('transactions.index')
             ->with('success', 'Transaksi berhasil dihapus.');
+    }
+
+    /**
+     * Serve a receipt image stored in the database (RECEIPT_DISK=database).
+     * Only the owner of the related transaction may view it.
+     */
+    public function receipt(string $filename): Response
+    {
+        $path = 'receipts/'.$filename;
+
+        $owned = Auth::user()->transactions()->where('receipt_image', $path)->exists();
+        $file = $owned ? ReceiptFile::where('path', $path)->first() : null;
+
+        abort_unless($file, 404);
+
+        return response(base64_decode($file->content), 200, [
+            'Content-Type' => $file->mime_type,
+            'Cache-Control' => 'private, max-age=86400',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     /**

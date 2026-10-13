@@ -2,6 +2,11 @@
     @csrf
     @method('put')
 
+    @if (! auth()->user()->password)
+    <div class="alert alert-info border-0 small py-2 mb-3">
+        Akun Anda dibuat dengan Google dan belum memiliki kata sandi. Buat kata sandi agar bisa login dengan email.
+    </div>
+    @else
     <!-- Current Password -->
     <div class="mb-3">
         <label for="update_password_current_password" class="form-label fw-semibold text-secondary small">Kata Sandi Saat Ini</label>
@@ -13,6 +18,7 @@
             @enderror
         </div>
     </div>
+    @endif
 
     <!-- New Password -->
     <div class="mb-3">

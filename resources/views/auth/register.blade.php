@@ -84,6 +84,7 @@
             </div>
         </form>
 
+        @if (config('services.google.client_id'))
         <!-- Divider atau -->
         <div class="text-center my-3">
             <span class="text-muted small">atau</span>
@@ -96,6 +97,7 @@
                 Daftar dengan Google
             </a>
         </div>
+        @endif
 
         <!-- Back to Login Link -->
         <div class="text-center">

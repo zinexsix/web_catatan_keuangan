@@ -16,6 +16,12 @@
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="alert alert-danger border-0 small mb-4 py-2" role="alert">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('login') }}" class="needs-validation" novalidate>
             @csrf
 
@@ -49,6 +55,7 @@
             </div>
         </form>
 
+        @if (config('services.google.client_id'))
         <!-- Divider atau -->
         <div class="text-center my-3">
             <span class="text-muted small">atau</span>
@@ -61,6 +68,7 @@
                 Login dengan Google
             </a>
         </div>
+        @endif
 
         <!-- Tips Login Box -->
         <div class="tips-box mb-4">
