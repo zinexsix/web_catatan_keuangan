@@ -21,47 +21,49 @@ class DashboardController extends Controller
         $currentMonth = $now->month;
         $currentYear = $now->year;
         
-        $lastMonthDate = Carbon::now()->subMonth();
-        $lastMonth = $lastMonthDate->month;
-        $lastMonthYear = $lastMonthDate->year;
+        $lastMonthKey = Carbon::now()->startOfMonth()->subMonth()->format('Y-m');
+        $currentMonthKey = $now->format('Y-m');
 
-        // ── Transactions Query ──
-        $transactionsQuery = $user->transactions();
-        
+        // ── Load the last 6 months of transactions once and aggregate in PHP ──
+        // (previously ~50 separate SUM/COUNT queries, which is slow against a remote database)
+        $rows = $user->transactions()
+            ->where('date', '>=', Carbon::now()->startOfMonth()->subMonths(5)->toDateString())
+            ->where('date', '<', Carbon::now()->startOfMonth()->addMonth()->toDateString())
+            ->toBase()
+            ->get(['date', 'type', 'amount', 'category_id']);
+
+        $monthly = [];   // 'Y-m' => ['income' => x, 'expense' => y, 'count' => n]
+        $daily = [];     // day of current month => expense
+        $byCategory = []; // category_id => expense in current month
+
+        foreach ($rows as $row) {
+            $date = substr((string) $row->date, 0, 10);
+            $monthKey = substr($date, 0, 7);
+            $amount = (float) $row->amount;
+
+            $monthly[$monthKey] ??= ['income' => 0.0, 'expense' => 0.0, 'count' => 0];
+            $monthly[$monthKey][$row->type] += $amount;
+            $monthly[$monthKey]['count']++;
+
+            if ($monthKey === $currentMonthKey && $row->type === 'expense') {
+                $day = (int) substr($date, 8, 2);
+                $daily[$day] = ($daily[$day] ?? 0) + $amount;
+                $byCategory[$row->category_id] = ($byCategory[$row->category_id] ?? 0) + $amount;
+            }
+        }
+
+        $month = fn (string $key, string $field) => $monthly[$key][$field] ?? 0;
+
         // ── Summary Cards Data ──
-        // Current Month Pemasukan & Pengeluaran
-        $incomeCurrentMonth = (float) $user->transactions()
-            ->income()
-            ->inMonth($currentMonth, $currentYear)
-            ->sum('amount');
-            
-        $expenseCurrentMonth = (float) $user->transactions()
-            ->expense()
-            ->inMonth($currentMonth, $currentYear)
-            ->sum('amount');
-
+        $incomeCurrentMonth = (float) $month($currentMonthKey, 'income');
+        $expenseCurrentMonth = (float) $month($currentMonthKey, 'expense');
         $netCurrentMonth = $incomeCurrentMonth - $expenseCurrentMonth;
-        
-        $transactionsCountCurrentMonth = $user->transactions()
-            ->inMonth($currentMonth, $currentYear)
-            ->count();
+        $transactionsCountCurrentMonth = (int) $month($currentMonthKey, 'count');
 
-        // Last Month Pemasukan & Pengeluaran
-        $incomeLastMonth = (float) $user->transactions()
-            ->income()
-            ->inMonth($lastMonth, $lastMonthYear)
-            ->sum('amount');
-            
-        $expenseLastMonth = (float) $user->transactions()
-            ->expense()
-            ->inMonth($lastMonth, $lastMonthYear)
-            ->sum('amount');
-
+        $incomeLastMonth = (float) $month($lastMonthKey, 'income');
+        $expenseLastMonth = (float) $month($lastMonthKey, 'expense');
         $netLastMonth = $incomeLastMonth - $expenseLastMonth;
-        
-        $transactionsCountLastMonth = $user->transactions()
-            ->inMonth($lastMonth, $lastMonthYear)
-            ->count();
+        $transactionsCountLastMonth = (int) $month($lastMonthKey, 'count');
 
         // ── Percentage Difference Calculations ──
         $incomeDiff = $this->calculatePercentageDifference($incomeLastMonth, $incomeCurrentMonth);
@@ -92,54 +94,30 @@ class DashboardController extends Controller
         $expenseDataset = [];
 
         for ($i = 5; $i >= 0; $i--) {
-            $date = Carbon::now()->subMonths($i);
+            $date = Carbon::now()->startOfMonth()->subMonths($i);
             $chartMonths[] = $date->translatedFormat('F Y');
-            
-            $incomeDataset[] = (float) $user->transactions()
-                ->income()
-                ->inMonth($date->month, $date->year)
-                ->sum('amount');
-                
-            $expenseDataset[] = (float) $user->transactions()
-                ->expense()
-                ->inMonth($date->month, $date->year)
-                ->sum('amount');
+            $incomeDataset[] = (float) $month($date->format('Y-m'), 'income');
+            $expenseDataset[] = (float) $month($date->format('Y-m'), 'expense');
         }
 
         // ── Chart 2: Pengeluaran per Kategori (Current Month) ──
-        $categoriesData = $user->transactions()
-            ->expense()
-            ->inMonth($currentMonth, $currentYear)
-            ->selectRaw('category_id, sum(amount) as total')
-            ->groupBy('category_id')
-            ->with('category')
-            ->get();
+        $categories = Category::whereIn('id', array_keys($byCategory))->get()->keyBy('id');
 
         $categoryLabels = [];
         $categoryTotals = [];
         $categoryColors = [];
-        
-        foreach ($categoriesData as $data) {
-            if ($data->category) {
-                $categoryLabels[] = $data->category->name;
-                $categoryTotals[] = (float) $data->total;
-                $categoryColors[] = $data->category->color;
+
+        foreach ($byCategory as $categoryId => $total) {
+            if ($category = $categories->get($categoryId)) {
+                $categoryLabels[] = $category->name;
+                $categoryTotals[] = (float) $total;
+                $categoryColors[] = $category->color;
             }
         }
 
-        // ── Chart 3: Tren Pengeluaran Harian / Bulanan ──
-        // (Let's make this Daily Expense trend for Current Month to make it premium and highly detailed)
-        $daysInMonth = $now->daysInMonth;
-        $dailyLabels = [];
-        $dailyExpenses = [];
-        
-        for ($day = 1; $day <= $daysInMonth; $day++) {
-            $dailyLabels[] = $day;
-            $dailyExpenses[] = (float) $user->transactions()
-                ->expense()
-                ->whereDate('date', Carbon::create($currentYear, $currentMonth, $day))
-                ->sum('amount');
-        }
+        // ── Chart 3: Tren Pengeluaran Harian (Current Month) ──
+        $dailyLabels = range(1, $now->daysInMonth);
+        $dailyExpenses = array_map(fn ($day) => (float) ($daily[$day] ?? 0), $dailyLabels);
 
         // Recent Transactions list
         $recentTransactions = $user->transactions()

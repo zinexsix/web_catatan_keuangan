@@ -1,0 +1,19 @@
+# Pings the app every few minutes so Vercel keeps a warm instance ready,
+# which avoids the 2-5 second "cold start" delay on the first request after idling.
+name: Keep app warm
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping health endpoint
+        run: |
+          curl --fail --silent --show-error --max-time 30 \
+            --output /dev/null --write-out "status=%{http_code} time=%{time_total}s\n" \
+            https://web-catatan-keuangan.vercel.app/up

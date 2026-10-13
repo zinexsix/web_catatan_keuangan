@@ -1,3 +1,9 @@
+{{-- Open connections to the asset CDNs early so CSS/JS/fonts arrive sooner --}}
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
 {{-- Installable app (PWA) metadata --}}
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
 <meta name="theme-color" content="#4f46e5">
