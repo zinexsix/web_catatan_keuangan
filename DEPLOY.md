@@ -40,8 +40,13 @@ Setelah mengubah `.env`, jalankan ulang `php artisan config:cache`.
 - Set `LOG_CHANNEL=stderr`.
 - Foto struk: pasang **volume** ke `storage/app/public`, atau set `RECEIPT_DISK=s3` dan gunakan Cloudflare R2 / S3.
 
-### Vercel
-Tidak disarankan. Filesystem read-only, sehingga wajib `RECEIPT_DISK=s3`, `LOG_CHANNEL=stderr`, MySQL eksternal, dan runtime PHP komunitas (`vercel-php`).
+### Vercel (gratis)
+Sudah disiapkan: [vercel.json](vercel.json) (runtime `vercel-php@0.7.4` / PHP 8.3) dan [api/index.php](api/index.php) yang mengarahkan `storage/` dan cache ke `/tmp`.
+
+- Database: MySQL eksternal gratis, misalnya **TiDB Cloud Starter** (port 4000, wajib SSL).
+- Foto struk: **Supabase Storage** (S3 compatible) dengan `RECEIPT_DISK=s3`.
+- Daftar environment variable ada di [.env.vercel.example](.env.vercel.example).
+- Migrasi dijalankan dari laptop: salin `.env.vercel.example` menjadi `.env.vercel`, isi, lalu `php artisan migrate --force --env=vercel`.
 
 ## 4. Backup & restore
 

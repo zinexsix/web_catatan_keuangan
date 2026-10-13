@@ -1,0 +1,12 @@
+/vendor
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/storage/logs/*
+/tests
+.env
+.env.*
+!.env.example
+!.env.production.example
+!.env.vercel.example
