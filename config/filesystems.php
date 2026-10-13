@@ -17,6 +17,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Receipt Image Disk
+    |--------------------------------------------------------------------------
+    |
+    | Disk used for transaction receipt uploads. Use "public" on hosting with
+    | a persistent filesystem, or "s3" (S3, Cloudflare R2, ...) on platforms
+    | whose filesystem is ephemeral or read-only.
+    |
+    */
+
+    'receipt_disk' => env('RECEIPT_DISK', 'public'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |

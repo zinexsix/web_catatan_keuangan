@@ -12,7 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Trust the hosting load balancer / reverse proxy so HTTPS is detected correctly.
+        $middleware->trustProxies(at: env('TRUSTED_PROXIES', '*'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

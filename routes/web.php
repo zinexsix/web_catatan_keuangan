@@ -39,7 +39,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('categories', CategoryController::class)->except(['create', 'show', 'edit']);
 
     // CRUD Transactions
-    Route::resource('transactions', TransactionController::class);
+    Route::resource('transactions', TransactionController::class)->except(['show']);
 
     // CRUD Saving Targets
     Route::resource('saving-targets', SavingTargetController::class)->except(['create', 'show', 'edit']);

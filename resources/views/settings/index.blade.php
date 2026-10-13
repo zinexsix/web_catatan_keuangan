@@ -62,20 +62,20 @@
             <div class="card-body p-4">
                 <!-- Backup Section -->
                 <div class="mb-4 p-3 border border-dashed rounded bg-light">
-                    <h6 class="fw-bold text-dark mb-1"><i class="fas fa-download me-1 text-success"></i> Backup Database</h6>
-                    <p class="text-secondary small mb-3">Unduh cadangan data transaksi, anggaran, target keuangan, dan preferensi dalam bentuk file SQL.</p>
-                    <a href="{{ route('settings.backup') }}" class="btn btn-success w-100 py-2"><i class="fas fa-cloud-arrow-down me-1"></i> Unduh File SQL</a>
+                    <h6 class="fw-bold text-dark mb-1"><i class="fas fa-download me-1 text-success"></i> Backup Data</h6>
+                    <p class="text-secondary small mb-3">Unduh cadangan data transaksi, kategori, anggaran, target tabungan, tagihan, dan preferensi akun Anda dalam bentuk file JSON.</p>
+                    <a href="{{ route('settings.backup') }}" class="btn btn-success w-100 py-2"><i class="fas fa-cloud-arrow-down me-1"></i> Unduh File Backup</a>
                 </div>
 
                 <!-- Restore Section -->
                 <div class="p-3 border border-dashed rounded bg-light">
-                    <h6 class="fw-bold text-dark mb-1"><i class="fas fa-upload me-1 text-danger"></i> Restore Database</h6>
-                    <p class="text-secondary small mb-3">Pulihkan database dari file cadangan SQL yang telah Anda unduh sebelumnya.</p>
+                    <h6 class="fw-bold text-dark mb-1"><i class="fas fa-upload me-1 text-danger"></i> Restore Data</h6>
+                    <p class="text-secondary small mb-3">Pulihkan data akun Anda dari file cadangan (.json) yang telah Anda unduh sebelumnya.</p>
                     
                     <form action="{{ route('settings.restore') }}" method="POST" enctype="multipart/form-data" id="restoreForm">
                         @csrf
                         <div class="mb-3">
-                            <input type="file" name="backup_file" id="backup_file" class="form-control" accept=".sql" required>
+                            <input type="file" name="backup_file" id="backup_file" class="form-control" accept=".json,application/json" required>
                         </div>
                         <button type="submit" class="btn btn-danger w-100 py-2"><i class="fas fa-clock-rotate-left me-1"></i> Pulihkan Data</button>
                     </form>
@@ -94,8 +94,8 @@ $(document).ready(function() {
         e.preventDefault();
         const form = this;
         Swal.fire({
-            title: 'Pulihkan Database?',
-            text: "Mengimpor database akan menimpa seluruh data transaksi, kategori, target tabungan, dan anggaran Anda yang ada saat ini!",
+            title: 'Pulihkan Data?',
+            text: "Proses ini akan menimpa seluruh data transaksi, kategori, target tabungan, dan anggaran Anda yang ada saat ini!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',

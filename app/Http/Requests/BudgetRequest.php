@@ -28,7 +28,7 @@ class BudgetRequest extends FormRequest
         return [
             'category_id' => [
                 'nullable', 
-                'exists:categories,id',
+                Rule::exists('categories', 'id')->where('user_id', $userId),
                 // Unique check combination of user, category, month, year
                 Rule::unique('budgets')->where(function ($query) use ($userId, $categoryId, $month, $year) {
                     return $query->where('user_id', $userId)

@@ -11,7 +11,6 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class TransactionController extends Controller
@@ -111,8 +110,7 @@ class TransactionController extends Controller
 
         // Handle File Upload
         if ($request->hasFile('receipt_image')) {
-            $path = $request->file('receipt_image')->store('receipts', 'public');
-            $data['receipt_image'] = Storage::url($path);
+            $data['receipt_image'] = $request->file('receipt_image')->store('receipts', Transaction::receiptDisk());
         }
 
         $transaction = $user->transactions()->create($data);
@@ -154,13 +152,9 @@ class TransactionController extends Controller
         // Handle File Upload
         if ($request->hasFile('receipt_image')) {
             // Delete old file if exists
-            if ($transaction->receipt_image) {
-                $oldPath = str_replace('/storage/', '', $transaction->receipt_image);
-                Storage::disk('public')->delete($oldPath);
-            }
-            
-            $path = $request->file('receipt_image')->store('receipts', 'public');
-            $data['receipt_image'] = Storage::url($path);
+            Transaction::deleteReceipt($transaction->getRawOriginal('receipt_image'));
+
+            $data['receipt_image'] = $request->file('receipt_image')->store('receipts', Transaction::receiptDisk());
         }
 
         $transaction->update($data);
@@ -183,10 +177,7 @@ class TransactionController extends Controller
         }
 
         // Delete file if exists
-        if ($transaction->receipt_image) {
-            $oldPath = str_replace('/storage/', '', $transaction->receipt_image);
-            Storage::disk('public')->delete($oldPath);
-        }
+        Transaction::deleteReceipt($transaction->getRawOriginal('receipt_image'));
 
         $transaction->delete();
 

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'user_id', 'category_id', 'date', 'type', 'amount',
@@ -119,7 +120,52 @@ class Transaction extends Model
         });
     }
 
+    // ── Receipt Storage ─────────────────────────────────
+
+    /**
+     * Disk used to store receipt images (public, s3, ...).
+     */
+    public static function receiptDisk(): string
+    {
+        return config('filesystems.receipt_disk', 'public');
+    }
+
+    /**
+     * Normalize a stored receipt value to its relative path ("receipts/xxx.jpg").
+     * Supports legacy values saved as full URLs or "/storage/receipts/...".
+     */
+    public static function receiptPath(?string $value): ?string
+    {
+        if (! $value) {
+            return null;
+        }
+
+        $pos = strpos($value, 'receipts/');
+
+        return $pos === false ? null : substr($value, $pos);
+    }
+
+    /**
+     * Delete a stored receipt file from the receipt disk.
+     */
+    public static function deleteReceipt(?string $value): void
+    {
+        if ($path = static::receiptPath($value)) {
+            Storage::disk(static::receiptDisk())->delete($path);
+        }
+    }
+
     // ── Accessors ───────────────────────────────────────
+
+    /**
+     * Public URL of the receipt image, built from the current disk/domain.
+     */
+    public function getReceiptImageAttribute(?string $value): ?string
+    {
+        $path = static::receiptPath($value);
+
+        return $path ? Storage::disk(static::receiptDisk())->url($path) : null;
+    }
 
     /**
      * Format amount as Indonesian Rupiah.

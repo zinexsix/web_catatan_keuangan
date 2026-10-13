@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class TransactionRequest extends FormRequest
 {
@@ -22,7 +23,7 @@ class TransactionRequest extends FormRequest
         return [
             'date' => ['required', 'date'],
             'type' => ['required', 'in:income,expense'],
-            'category_id' => ['required', 'exists:categories,id'],
+            'category_id' => ['required', Rule::exists('categories', 'id')->where('user_id', auth()->id())],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
