@@ -11,6 +11,7 @@
 
     <title>{{ config('app.name', 'Finance Manager') }}</title>
     @include('partials.pwa-head')
+    @include('partials.motion-head')
 
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -40,7 +41,8 @@
             --shadow-md: 0 4px 12px rgba(15,23,42,0.06);
             --shadow-lg: 0 12px 28px -8px rgba(15,23,42,0.12);
             --radius: 12px;
-            --transition: 0.15s ease;
+            --transition: 0.2s ease;
+            --ease-out-smooth: cubic-bezier(0.22, 1, 0.36, 1);
         }
         [data-theme="dark"] {
             --body-bg: #0b0f19;
@@ -97,8 +99,9 @@
             z-index: 1050;
             display: flex;
             flex-direction: column;
-            transition: transform var(--transition);
+            transition: transform 0.32s var(--ease-out-smooth);
             overflow: hidden;
+            will-change: transform;
         }
         #sidebar .sidebar-inner {
             display: flex;
@@ -196,7 +199,7 @@
             color: rgba(255,255,255,0.55);
             text-decoration: none;
             font-size: 0.875rem; font-weight: 500;
-            transition: all var(--transition);
+            transition: color var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition), transform 0.15s ease;
             position: relative; overflow: hidden;
             border-left: 2px solid transparent;
         }
@@ -279,7 +282,7 @@
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; font-size: 0.9rem;
             color: var(--text-secondary);
-            transition: all var(--transition);
+            transition: color var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition), transform 0.15s ease;
             text-decoration: none;
         }
         .navbar-icon-btn:hover { background: var(--border-color); color: var(--text-primary); }
@@ -288,7 +291,7 @@
             padding: 5px 10px 5px 5px;
             border-radius: 50px; border: 1px solid var(--border-color);
             background: var(--card-bg); cursor: pointer;
-            transition: all var(--transition);
+            transition: color var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition), transform 0.15s ease;
         }
         .navbar-user:hover { box-shadow: var(--shadow-md); }
         .navbar-user-avatar {
@@ -347,7 +350,7 @@
             background: var(--card-bg); color: var(--text-primary);
             border: 1.5px solid var(--border-color);
             border-radius: 10px; padding: 0.6rem 0.9rem;
-            font-size: 0.875rem; transition: all var(--transition);
+            font-size: 0.875rem; transition: color var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition), transform 0.15s ease;
         }
         .form-control:focus, .form-select:focus {
             background: var(--card-bg); color: var(--text-primary);
@@ -359,7 +362,7 @@
         .btn-primary {
             background: var(--accent);
             border: 1px solid var(--accent); font-weight: 600;
-            transition: all var(--transition);
+            transition: color var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition), transform 0.15s ease;
         }
         .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.25); }
         .btn-outline-primary { color: var(--accent); border-color: var(--accent); }
@@ -382,11 +385,13 @@
 
         /* ===== SIDEBAR OVERLAY ===== */
         #sidebar-overlay {
-            display: none; position: fixed; inset: 0;
+            position: fixed; inset: 0;
             background: rgba(0,0,0,0.5); z-index: 1040;
             backdrop-filter: blur(2px);
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        #sidebar-overlay.show { display: block; }
+        #sidebar-overlay.show { opacity: 1; visibility: visible; }
 
         /* ===== MODAL ===== */
         .modal-content {
@@ -429,7 +434,11 @@
         }
 
         /* ===== TRANSITIONS ===== */
-        .btn, .nav-link, .card, .form-control { transition: all var(--transition); }
+        .btn, .nav-link, .form-control {
+            transition: color var(--transition), background-color var(--transition),
+                        border-color var(--transition), box-shadow var(--transition), transform 0.15s ease;
+        }
+        .card { transition: box-shadow var(--transition), background-color var(--transition); }
 
         /* ===== MOBILE LIST (card rows used instead of tables on phones) ===== */
         .mobile-list-item {
@@ -761,6 +770,7 @@
     </nav>
 
     @include('partials.pwa-install')
+    @include('partials.motion-script')
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
