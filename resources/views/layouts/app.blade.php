@@ -384,14 +384,18 @@
         .alert { border-radius: var(--radius); border: none; }
 
         /* ===== SIDEBAR OVERLAY ===== */
+        /* No backdrop blur: it is expensive on phone GPUs and makes the slide stutter */
         #sidebar-overlay {
             position: fixed; inset: 0;
-            background: rgba(0,0,0,0.5); z-index: 1040;
-            backdrop-filter: blur(2px);
+            background: rgba(15, 23, 42, 0.5); z-index: 1040;
             opacity: 0; visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+            will-change: opacity;
         }
-        #sidebar-overlay.show { opacity: 1; visibility: visible; }
+        #sidebar-overlay.show {
+            opacity: 1; visibility: visible;
+            transition: opacity 0.35s ease, visibility 0s;
+        }
 
         /* ===== MODAL ===== */
         .modal-content {
@@ -422,15 +426,41 @@
         /* ===== RESPONSIVE ===== */
         @media (max-width: 991.98px) {
             #sidebar {
+                height: 100dvh;
+                max-width: 85vw;
                 transform: translateX(-100%);
+                /* closing: quick and accelerating out */
+                transition: transform 0.26s cubic-bezier(0.4, 0, 1, 1), box-shadow 0.26s ease;
+                touch-action: pan-y;
             }
             #sidebar.show {
                 transform: translateX(0);
+                box-shadow: 12px 0 40px rgba(0, 0, 0, 0.3);
+                /* opening: slower with a soft landing */
+                transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.42s ease;
             }
+            #sidebar.dragging { transition: none !important; }
             #main-content {
                 margin-left: 0 !important;
             }
             .sidebar-close-btn { display: flex !important; }
+            body.sidebar-open { overflow: hidden; }
+
+            /* Menu items slide in one after another when the sidebar opens */
+            #sidebar .sidebar-profile,
+            #sidebar .sidebar-nav .nav > *,
+            #sidebar .sidebar-footer {
+                opacity: 0; transform: translateX(-14px);
+                transition: opacity 0.15s ease, transform 0.15s ease;
+            }
+            #sidebar.show .sidebar-profile,
+            #sidebar.show .sidebar-nav .nav > *,
+            #sidebar.show .sidebar-footer {
+                opacity: 1; transform: none;
+                transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+                transition-delay: calc(var(--stagger, 0) * 25ms + 60ms);
+            }
+            #sidebar.show .sidebar-footer { transition-delay: 300ms; }
         }
 
         /* ===== TRANSITIONS ===== */
@@ -790,14 +820,65 @@
         const themeToggle = document.getElementById('theme-toggle');
         const html = document.documentElement;
 
+        // Stagger index for the slide-in animation of menu items
+        sidebar.querySelectorAll('.sidebar-nav .nav > *').forEach(function (el, i) {
+            el.style.setProperty('--stagger', i + 1);
+        });
+
         function openSidebar() {
             sidebar.classList.add('show');
             if (overlay) overlay.classList.add('show');
+            document.body.classList.add('sidebar-open');
         }
         function closeSidebar() {
             sidebar.classList.remove('show');
             if (overlay) overlay.classList.remove('show');
+            document.body.classList.remove('sidebar-open');
         }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && sidebar.classList.contains('show')) closeSidebar();
+        });
+
+        // Swipe the open sidebar to the left to close it (follows the finger)
+        (function () {
+            let startX = 0, startY = 0, startTime = 0, dx = 0, tracking = false, dragging = false;
+
+            sidebar.addEventListener('touchstart', function (e) {
+                if (!sidebar.classList.contains('show') || e.touches.length !== 1) return;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                startTime = Date.now();
+                dx = 0; tracking = true; dragging = false;
+            }, { passive: true });
+
+            sidebar.addEventListener('touchmove', function (e) {
+                if (!tracking) return;
+                const moveX = e.touches[0].clientX - startX;
+                const moveY = e.touches[0].clientY - startY;
+                if (!dragging) {
+                    if (Math.abs(moveX) < 8 && Math.abs(moveY) < 8) return;
+                    if (Math.abs(moveY) > Math.abs(moveX) || moveX > 0) { tracking = false; return; }
+                    dragging = true;
+                    sidebar.classList.add('dragging');
+                    if (overlay) overlay.style.transition = 'none';
+                }
+                dx = Math.min(0, moveX);
+                sidebar.style.transform = 'translateX(' + dx + 'px)';
+                if (overlay) overlay.style.opacity = String(Math.max(0, 1 + dx / sidebar.offsetWidth));
+            }, { passive: true });
+
+            sidebar.addEventListener('touchend', function () {
+                if (!tracking) return;
+                tracking = false;
+                if (!dragging) return;
+                const velocity = Math.abs(dx) / Math.max(1, Date.now() - startTime);
+                sidebar.classList.remove('dragging');
+                sidebar.style.transform = '';
+                if (overlay) { overlay.style.transition = ''; overlay.style.opacity = ''; }
+                if (dx < -sidebar.offsetWidth * 0.3 || velocity > 0.5) closeSidebar();
+            });
+        })();
 
         if (toggleBtn) toggleBtn.addEventListener('click', function() {
             sidebar.classList.contains('show') ? closeSidebar() : openSidebar();
